@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: "Gilroy-SemiBold";
+  src:
+       url("/fonts/Gilroy-SemiBold.woff") format("woff");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@theme {
+  --color-purple: #4E2FD2;
+  --color-lightPurple: #EDF4FF;
+  --color-textBlack: #0B0D10;
+  --color-textRed: #D8392B;
+  --color-borderGreen: #0AA288;
+  --color-bg-Green: #1DF0BB;
+  --color-steps: #484848;
+  --text-steps-title: 22px;
+  --font-gilroy: "Gilroy-SemiBold", sans-serif;
+}
+
+/* Choose your cameras title — matches Figma exactly */
+.cameras-title {
+  font-family: "Gilroy-SemiBold", sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 22px;
+  line-height: 100%;
+  letter-spacing: 0px;
+  color: #0B0D10;
+}
+
+
+
+html, body {
+  @apply bg-lightPurple text-textBlack;
+  font-family: sans-serif;
+}
+
+h1 {
+  @apply text-purple font-bold;
+}
