@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Collapse } from "antd";
 import type { CollapseProps } from "antd";
 import { CameraOption } from "@/types/builder";
@@ -14,6 +14,20 @@ const cameraOptions: CameraOption[] = [
     priceAfter: 27.98,
     discount: 22,
     image: "/assets/images/image1.png",
+    options:[
+      {
+        image: "/assets/images/card1-option-white.png",
+        text: "White"
+      },
+      {
+        image: "/assets/images/card1-option-gray.png",
+        text: "Gray" 
+      },
+      {
+        image: "/assets/images/card1-option-black.png",
+        text: "Black"
+      }
+    ]
   },
   {
     id: "pan-v2",
@@ -23,6 +37,16 @@ const cameraOptions: CameraOption[] = [
     priceAfter: 34.98,
     discount: 12,
     image: "/assets/images/image2.png",
+    options:[
+      {
+        image: "/assets/images/card2-option-white.png",
+        text: "White"
+      },
+      {
+        image: "/assets/images/card2-option-black.png",
+        text: "Black"
+      }
+    ]
   },
   {
     id: "pan-v3",
@@ -32,6 +56,15 @@ const cameraOptions: CameraOption[] = [
     priceAfter: 69.98,
     discount: 22,
     image: "/assets/images/image3.png",
+    options:[
+      {
+        image: "/assets/images/card3-option-white.png",
+        text: "White"},
+        {
+          image: "/assets/images/card3-option-black.png",
+          text: "Black"
+        }
+    ]
   },
   {
     id: "pan-v4",
@@ -49,7 +82,7 @@ const cameraOptions: CameraOption[] = [
   },
 ];
 
-type ColorOption = "white" | "black";
+type ColorOption = string;
 
 interface CameraState {
   color: ColorOption;
@@ -57,32 +90,126 @@ interface CameraState {
   selected: boolean;
 }
 
-export default function CameraSelector() {
-  const [states, setStates] = useState<Record<number, CameraState>>(
-    Object.fromEntries(
-      cameraOptions.map((_, i) => [i, { color: "white", quantity: 1, selected: false }])
-    )
-  );
+export default function CameraSelector({onSelectionChange}: {onSelectionChange: (selected: { cam: CameraOption; quantity: number; color?: string , image?: string}[]) => void}) {
+  // Initialize state with each color as a separate selectable option
+  // First option of first camera is selected by default
+  const [states, setStates] = useState<Record<string, CameraState>>(() => {
+    const initialState: Record<string, CameraState> = {};
+    
+    cameraOptions.forEach((camera, i) => {
+      if (camera.options && camera.options.length > 0) {
+        // Camera has color options - create entry for each color
+        camera.options.forEach((opt, optIndex) => {
+          const key = `${i}-${opt.text}`;
+          initialState[key] = {
+            color: opt.text,
+            quantity: 1,
+            selected: i === 0 && optIndex === 0, // Select first option of first camera
+          };
+        });
+      } else {
+        // Camera without color options
+        const key = `${i}-default`;
+        initialState[key] = {
+          color: "",
+          quantity: 1,
+          selected: i === 0, // Select first camera if it has no options
+        };
+      }
+    });
+    
+    return initialState;
+  });
 
-  const toggleSelect = (i: number) =>
-    setStates((prev) => ({ ...prev, [i]: { ...prev[i], selected: !prev[i].selected } }));
+  useEffect(() => {
+    const selected = Object.entries(states)
+      .filter(([_, s]) => s.selected)
+      .map(([key, s]) => {
+        const [i] = key.split("-");
+        const cam = cameraOptions[Number(i)];
+        const optionImage = cam.options?.find((opt) => opt.text === s.color)?.image ?? cam.image;
+        return {
+          cam,
+          quantity: s.quantity,
+          color: s.color,
+          image: optionImage,
+        };
+      });
+    onSelectionChange(selected);
+  }, [states, onSelectionChange]);
 
-  const setColor = (i: number, color: ColorOption) =>
-    setStates((prev) => ({ ...prev, [i]: { ...prev[i], color } }));
-
-  const updateQty = (i: number, delta: number) =>
+  const toggleSelect = (i: number, color: string) => {
+    const key = color ? `${i}-${color}` : `${i}-default`;
     setStates((prev) => ({
       ...prev,
-      [i]: { ...prev[i], quantity: Math.max(0, prev[i].quantity + delta) },
+      [key]: {
+        ...(prev[key] ?? { color, quantity: 1, selected: false }),
+        selected: !prev[key]?.selected,
+      },
     }));
+  };
+
+  const updateQty = (i: number, color: string, delta: number) => {
+    const key = color ? `${i}-${color}` : `${i}-default`;
+    setStates((prev) => ({
+      ...prev,
+      [key]: {
+        ...(prev[key] ?? { color, quantity: 1, selected: false }),
+        quantity: Math.max(1, (prev[key]?.quantity ?? 1) + delta),
+      },
+    }));
+  };
+
+  const isColorSelected = (i: number, color: string) => {
+    const key = color ? `${i}-${color}` : `${i}-default`;
+    return states[key]?.selected ?? false;
+  };
+
+  const getColorQuantity = (i: number, color: string) => {
+    const key = color ? `${i}-${color}` : `${i}-default`;
+    return states[key]?.quantity ?? 1;
+  };
+
+  // Get the active color to display (first selected color or first option)
+  const getActiveColor = (i: number, cam: CameraOption) => {
+    if (!cam.options || cam.options.length === 0) return "";
+    
+    // Find first selected color for this camera
+    for (const opt of cam.options) {
+      if (isColorSelected(i, opt.text)) {
+        return opt.text;
+      }
+    }
+    // Default to first option
+    return cam.options[0].text;
+  };
+
+
 
   const selectedCount = Object.values(states).filter((s) => s.selected).length;
 
   const collapseLabel = (
-    <div className="flex flex-col gap-2">
-      <span className="text-xs text-steps font-medium tracking-wide">Step 1 of 4</span>
+    <div className="flex flex-col gap-2 " >
+      <span className="step-label">Step 1 of 4</span>
       <div className="h-px bg-steps mt-2" />
-      <span className="cameras-title">Choose your cameras</span>
+      <div className="flex items-center gap-2">
+        <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g clipPath="url(#clip0_68_9780)">
+            <path d="M8.6665 24.9166V20.5833" stroke="#6F7882" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M17.3335 24.9166V20.5833" stroke="#6F7882" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M22.75 24.9167L3.25 24.9167" stroke="#6F7882" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M13 5.14581C15.2436 5.14581 17.0625 6.96473 17.0625 9.20831C17.0625 11.4519 15.2436 13.2708 13 13.2708C10.7564 13.2708 8.9375 11.4519 8.9375 9.20831C8.9375 6.96473 10.7564 5.14581 13 5.14581Z" stroke="#6F7882" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M12.9731 16.25C12.7489 16.25 12.5669 16.432 12.5669 16.6562C12.5669 16.8805 12.7489 17.0625 12.9731 17.0625C13.1974 17.0625 13.3794 16.8805 13.3794 16.6562C13.3794 16.432 13.1974 16.25 12.9731 16.25Z" fill="#6F7882" stroke="#6F7882" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            <rect x="3.1875" y="0.75" width="19.625" height="19.625" rx="3.25" stroke="#6F7882" strokeWidth="1.5"/>
+          </g>
+          <defs>
+            <clipPath id="clip0_68_9780">
+              <rect width="26" height="26" fill="white"/>
+            </clipPath>
+          </defs>
+        </svg>
+        <span className="cameras-title">Choose your cameras</span>
+      </div>
     </div>
   );
 
@@ -91,21 +218,33 @@ export default function CameraSelector() {
       key: "cameras",
       label: collapseLabel,
       extra: selectedCount > 0 ? (
-        <span className="text-xs font-semibold text-purple">
-          {selectedCount} item{selectedCount > 1 ? "s" : ""} selected
+        <span className="selected-text">
+          {selectedCount} selected
         </span>
       ) : undefined,
       children: (
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-4 bg-lightPurple p-4 -m-4">
           {cameraOptions.map((cam, i) => {
-            const { color, quantity, selected } = states[i];
+            const activeColor = getActiveColor(i, cam);
+            const hasAnySelected = cam.options?.some(opt => isColorSelected(i, opt.text)) ?? isColorSelected(i, "");
+            const currentColorImage = cam.options?.find(opt => opt.text === activeColor)?.image ?? cam.image;
+
+            // Determine if card should be clickable
+            const isCardClickable = !cam.options || cam.options.length === 0;
+            
+            const handleCardClick = () => {
+              if (isCardClickable) {
+                toggleSelect(i, "");
+              }
+            };
+
             return (
               <div
-                key={i}
-                onClick={() => toggleSelect(i)}
-                className={`relative flex gap-4 p-4 bg-white rounded-xl border-2 cursor-pointer transition-colors ${
-                  selected ? "border-purple" : "border-gray-200"
-                }`}
+                key={`${i}-${cam.id}`}
+                className={`relative flex gap-4 p-4 bg-white rounded-xl border-2 transition-colors ${
+                  hasAnySelected ? "border-purple" : "border-gray-200"
+                } ${isCardClickable ? "cursor-pointer hover:border-purple/50" : ""}`}
+                onClick={handleCardClick}
               >
                 {/* Discount tag */}
                 {cam.discount && (
@@ -116,9 +255,9 @@ export default function CameraSelector() {
 
                 {/* Image */}
                 <div className="w-24 h-24 shrink-0 rounded-lg overflow-hidden mt-5 flex items-center justify-center">
-                  {cam.image ? (
+                  {currentColorImage ? (
                     <img
-                      src={cam.image}
+                      src={currentColorImage}
                       alt={cam.name}
                       className="w-full h-full object-cover"
                     />
@@ -129,52 +268,127 @@ export default function CameraSelector() {
 
                 {/* Right side */}
                 <div className="flex-1 flex flex-col gap-2">
-                  <h3 className="font-semibold text-textBlack">{cam.name}</h3>
-                  <p className="text-sm text-gray-500">{cam.description}</p>
+                  <h3 className="cards-title">{cam.name}</h3>
+                  <p className="cards-description">
+                    {cam.description}{" "}
+                    <a target="_blank" href="https://www.linkedin.com/in/rana-nassar-28a601192/" className="cards-description-link">
+                      Learn More
+                    </a>
+                  </p>
 
                   {/* Color options */}
-                  <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
-                    {(["white", "black"] as ColorOption[]).map((c) => (
-                      <button
-                        key={c}
-                        onClick={() => setColor(i, c)}
-                        className={`px-3 py-1 text-sm rounded-md border capitalize transition-colors ${
-                          color === c
-                            ? "bg-bg-Green/40 border-borderGreen text-black"
-                            : "border-gray-300 text-gray-600 hover:border-gray-400"
-                        }`}
-                      >
-                        {c}
-                      </button>
-                    ))}
-                  </div>
+                  {cam.options?.length ? (
+                    <div
+                      className="flex justify-start items-center gap-2"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {cam.options.map((option) => {
+                        const isSelected = isColorSelected(i, option.text);
+                        
+                        return (
+                          <button
+                            key={option.text}
+                            onClick={() => toggleSelect(i, option.text)}
+                            className={`px-3 py-1 flex items-center justify-center gap-2 rounded-sm border transition-colors ${
+                              isSelected
+                                ? "bg-bg-Green/40 border-borderGreen text-black"
+                                : "border-gray-300 text-gray-600 hover:border-gray-400"
+                            }`}
+                          >
+                            <img
+                              src={option.image}
+                              alt={`${cam.name} ${option.text}`}
+                              className="cards-options-img"
+                            />
+                            <span className="cards-options">{option.text}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  ) : null}
 
                   {/* Quantity + Price */}
-                  <div
-                    className="flex items-center gap-4 mt-auto"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => updateQty(i, -1)}
-                        className="w-7 h-7 flex items-center justify-center rounded-full border border-gray-300 hover:bg-gray-100 text-base leading-none"
-                      >
-                        −
-                      </button>
-                      <span className="w-6 text-center font-medium text-sm">
-                        {quantity}
-                      </span>
-                      <button
-                        onClick={() => updateQty(i, 1)}
-                        className="w-7 h-7 flex items-center justify-center rounded-full border border-gray-300 hover:bg-gray-100 text-base leading-none"
-                      >
-                        +
-                      </button>
+                  {cam.options?.length ? (
+                    cam.options.filter(opt => isColorSelected(i, opt.text)).length > 0 ? (
+                      <div className="space-y-2">
+                        {cam.options.filter(opt => isColorSelected(i, opt.text)).map((option) => {
+                          const quantity = getColorQuantity(i, option.text);
+                        
+                          return (
+                            <div
+                              key={`qty-${option.text}`}
+                              className="flex items-start justify-between gap-4"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <div className="flex items-center gap-2">
+                                <button
+                                  onClick={() => updateQty(i, option.text, -1)}
+                                  className="w-7 h-7 flex items-center justify-center rounded-sm border border-gray-300 hover:bg-gray-100 text-base leading-none"
+                                >
+                                  −
+                                </button>
+                                <span className="w-6 text-center font-medium text-sm">
+                                  {quantity} 
+                                </span>
+                                <button
+                                  onClick={() => updateQty(i, option.text, 1)}
+                                  className="w-7 h-7 flex items-center justify-center rounded-sm border border-gray-300 hover:bg-gray-100 text-base leading-none"
+                                >
+                                  +
+                                </button>
+                              </div>
+                              <div className="flex flex-col items-end gap-1">
+                                {option.text}
+                              </div>
+                              <div className="flex flex-col items-end gap-1">
+                                {cam.priceAfter ? (
+                                  <>
+                                    <span className="price-before">${cam.priceBefore.toFixed(2)}</span>
+                                    <span className="price-after">${cam.priceAfter.toFixed(2)}</span>
+                                  </>
+                                ) : (
+                                  <span className="price-after">${cam.priceBefore.toFixed(2)}</span>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : null
+                  ) : (
+                    <div
+                      className="flex items-start justify-between gap-4 mt-auto"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => updateQty(i, "", -1)}
+                          className="w-7 h-7 flex items-center justify-center rounded-sm border border-gray-300 hover:bg-gray-100 text-base leading-none"
+                        >
+                          −
+                        </button>
+                        <span className="w-6 text-center font-medium text-sm">
+                          {getColorQuantity(i, "")}
+                        </span>
+                        <button
+                          onClick={() => updateQty(i, "", 1)}
+                          className="w-7 h-7 flex items-center justify-center rounded-sm border border-gray-300 hover:bg-gray-100 text-base leading-none"
+                        >
+                          +
+                        </button>
+                      </div>
+                      <div className="flex flex-col items-end gap-1">
+                        {cam.priceAfter ? (
+                          <>
+                            <span className="price-before">${cam.priceBefore.toFixed(2)}</span>
+                            <span className="price-after">${cam.priceAfter.toFixed(2)}</span>
+                          </>
+                        ) : (
+                          <span className="price-after">${cam.priceBefore.toFixed(2)}</span>
+                        )}
+                      </div>
                     </div>
-                    <span className="text-purple font-bold">
-                      ${(cam.priceBefore * quantity).toFixed(2)}
-                    </span>
-                  </div>
+                  )}
                 </div>
               </div>
             );
@@ -187,9 +401,10 @@ export default function CameraSelector() {
 
   return (
     <Collapse
+    className="bg-lightPurple rounded-lg shadow"
+    style={{ backgroundColor: "var(--color-lightPurple)" }}
       items={items}
       defaultActiveKey={["cameras"]}
-      className="bg-lightPurple"
       expandIconPlacement="end"
       expandIcon={({ isActive }) => (
         <svg

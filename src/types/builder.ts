@@ -9,6 +9,11 @@ export interface CameraOption {
   description: string;
   priceBefore: number;
   priceAfter?: number;
+  options?: {
+    image: string;
+    text: string;
+  }[];
+
   discount?: number;
   image?: string;
 }

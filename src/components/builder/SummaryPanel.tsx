@@ -1,31 +1,73 @@
-import { Card } from "antd";
+import { CameraOption } from "@/types/builder";
+import { Card, Divider } from "antd";
 
-export default function SummaryPanel() {
+export default function SummaryPanel({ selected,onUpdateQty }: {  selected: { cam: CameraOption; quantity: number; color?: string; image?: string  }[];
+  onUpdateQty: (camId: string, color: string | undefined, delta: number) => void; }) {
+ const total = selected.reduce(
+    (sum, { cam, quantity }) =>
+      sum + (cam.priceAfter ?? cam.priceBefore) * quantity,
+    0
+  );
   return (
-    <Card className="shadow-lg">
-      <h2 className="text-xl font-bold text-textBlack mb-4">
+    <Card className="shadow-lg"  style={{ backgroundColor: "var(--color-lightPurple)" }}>
+      <p className="step-label" >Review</p>
+      <h2 className="cameras-title">
         Your Security System
       </h2>
-
+    <p className="review-description">
+    Review you personalized protection system designed to keep what matters most safe.
+    </p>
+    <Divider />
       <div className="space-y-3">
-        <div>
-          <p className="font-semibold">Cameras</p>
-          <p className="text-sm">Wyze Cam v4 × 1 — $27.98</p>
-          <p className="text-sm">Wyze Cam Pan v3 × 2 — $47.98</p>
+        <p className="review-regular-title">Cameras</p>
+        <div className="space-y-4 ">
+          {selected.map(({ cam, quantity, color, image }) => (
+            <div
+              key={`${cam.id}-${color}`}
+              className="flex items-center justify-between gap-2  p-1 rounded-md"
+            >
+              {/* Image */}
+              <div className="w-10 h-10 rounded overflow-hidden flex-shrink-0">
+                {/* <img src={cam.image} alt={cam.name} className="w-full h-full object-cover" /> */}
+                   <img src={image} alt={`${cam.name} ${color}`} className="w-full h-full object-cover" />
+              </div>
+
+              {/* Name + Color */}
+            
+
+                <div className="review-text">
+                  {cam.name}
+                </div>
+
+              {/* Quantity controls */}
+              <div className="flex items-center gap-2 ">
+                <button
+                  onClick={() => onUpdateQty(cam.id, color, -1)}
+                  className="w-5 h-5 flex items-center justify-center rounded-sm border border-gray-300 hover:bg-gray-100"
+                >
+                  −
+                </button>
+                <span className="w-6 text-center font-medium text-sm">{quantity}</span>
+                <button
+                  onClick={() => onUpdateQty(cam.id, color, 1)}
+                  className="w-5 h-5 flex items-center justify-center rounded-sm border border-gray-300 hover:bg-gray-100"
+                >
+                  +
+                </button>
+              </div>
+
+              {/* Prices */}
+               <div className="flex flex-col justify-center  gap-1">
+                      {cam.priceAfter ? (<><span className="review-price-before">${cam.priceBefore.toFixed(2)}</span>  <span className="review-price-after">${cam.priceAfter.toFixed(2)}</span> </>): (<span className="review-price-after">${cam.priceBefore.toFixed(2)}</span>)}
+                   
+                    </div>
+            </div>
+          ))}
         </div>
 
-        <div>
-          <p className="font-semibold">Sensors</p>
-          <p className="text-sm">Motion Sensor × 2 — $59.98</p>
-        </div>
-
-        <div>
-          <p className="font-semibold">Accessories</p>
-          <p className="text-sm">MicroSD 256GB × 2 — $41.96</p>
-        </div>
-
-        <div className="pt-4 border-t">
-          <p className="text-lg font-bold text-purple">Total: $187.89</p>
+        <Divider />
+        <div className="pt-4">
+          <p className="text-lg font-bold text-purple">Total: ${total.toFixed(2)}</p>
         </div>
       </div>
     </Card>

@@ -9,6 +9,25 @@
   font-display: swap;
 }
 
+@font-face {
+  font-family: "Gilroy-Medium";
+  src:
+       url("/fonts/Gilroy-Medium.woff") format("woff");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Gilroy-Regular";
+  src:
+       url("/fonts/Gilroy-Regular.woff") format("woff");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+
 @theme {
   --color-purple: #4E2FD2;
   --color-lightPurple: #EDF4FF;
@@ -18,24 +37,275 @@
   --color-bg-Green: #1DF0BB;
   --color-steps: #484848;
   --text-steps-title: 22px;
-  --font-gilroy: "Gilroy-SemiBold", sans-serif;
+}
+
+.ant-collapse-content-box {
+  background-color: var(--color-lightPurple) !important;
+}
+/* Step 1 of 4 label — matches Figma styles */
+.step-label {
+  width: 738px;
+  height: 12px;
+  font-family: "Gilroy-Medium", sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 100%;
+  display: flex;
+  align-items: center;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: #484848;
+  flex: none;
+  order: 0;
+  flex-grow: 1;
+}
+
+.selected-text{
+  font-family: "Gilroy-Medium", sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 16px;
+  text-align: center;
+  color: #4E2FD2;
 }
 
 /* Choose your cameras title — matches Figma exactly */
 .cameras-title {
+/* Choose your cameras */
+
+width: 621px;
+height: 22px;
+
+font-family: 'Gilroy-SemiBold';
+font-style: normal;
+font-weight: 400;
+font-size: 22px;
+line-height: 100%;
+/* identical to box height, or 22px */
+
+/* Gray-C/Obsidian */
+color: #0B0D10;
+
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+flex-grow: 1;
+
+}
+
+.cards-title{
+  /* Wyze Cam v4 */
+
+width: 219.5px;
+height: 16px;
+
+font-family: 'Gilroy-SemiBold';
+font-style: normal;
+font-weight: 400;
+font-size: 16px;
+line-height: 100%;
+/* identical to box height, or 16px */
+display: flex;
+align-items: center;
+letter-spacing: 0.6px;
+
+color: #1F1F1F;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 0;
+
+}
+
+.review-text{
+  /* Wyze Cam v4 */
+
+font-family: 'Gilroy-Medium', sans-serif;
+font-style: normal;
+font-weight: 400;
+font-size: 14px;
+line-height: 16px;
+/* identical to box height, or 16px */
+display: flex;
+align-items: center;
+letter-spacing: 0.6px;
+color: #0B0D10;
+
+
+}
+
+.review-description{
+  /* 360° pan and 180° tilt security camera. Learn More */
+  max-width: 300px;
+font-family: "Gilroy-Medium", sans-serif;
+font-style: normal;
+font-weight: 400;
+font-size: 14px;
+line-height: 130%;
+/* or 16px */
+letter-spacing: 0.6px;
+
+color: rgba(31, 31, 31, 0.75);
+
+
+}
+
+.review-regular-title {
+  /* Cameras */
+
+width: 57px;
+height: 16px;
+
+font-family: 'Gilroy-Regular';
+font-style: normal;
+font-weight: 400;
+font-size: 12px;
+line-height: 16px;
+/* identical to box height, or 133% */
+text-align: center;
+letter-spacing: 0.03em;
+text-transform: uppercase;
+
+/* Gray-C/500 */
+color: #A8B2BD;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+}
+
+.cards-description{
+  /* 360° pan and 180° tilt security camera. Learn More */
+
+width: 205px;
+height: 32px;
+
+font-family: "Gilroy-Medium", sans-serif;
+font-style: normal;
+font-weight: 400;
+font-size: 12px;
+line-height: 130%;
+/* or 16px */
+letter-spacing: 0.6px;
+
+color: rgba(31, 31, 31, 0.75);
+
+
+}
+
+.cards-description-link {
+  color: #4E2FD2;
+  text-decoration: underline;
+}
+
+.cards-description-link:hover {
+  color: #4E2FD2;
+}
+
+.price-before {
+  width: 115px;
+  height: 16px;
+  font-family: "Gilroy-Regular", sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 100%;
+  display: flex;
+  align-items: center;
+  text-align: right;
+  letter-spacing: 0.6px;
+  text-decoration-line: line-through;
+  color: #D8392B;
+  flex: none;
+  order: 0;
+  align-self: stretch;
+  flex-grow: 0;
+}
+
+.price-after {
+  width: 115px;
+  height: 16px;
+  font-family: "Gilroy-Regular", sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 100%;
+  display: flex;
+  align-items: center;
+  text-align: right;
+  letter-spacing: 0.6px;
+  color: #575757;
+  flex: none;
+  order: 1;
+  align-self: stretch;
+  flex-grow: 0;
+}
+
+.review-price-before {
+  width: 115px;
+  height: 16px;
+  font-family: "Gilroy-Medium", sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: right;
+  letter-spacing: 0.5px;
+  text-decoration-line: line-through;
+  color: #6F7882;
+
+
+}
+
+.review-price-after {
+  width: 115px;
+  height: 16px;
   font-family: "Gilroy-SemiBold", sans-serif;
   font-style: normal;
   font-weight: 400;
-  font-size: 22px;
-  line-height: 100%;
-  letter-spacing: 0px;
-  color: #0B0D10;
+  font-size: 14px;
+  line-height: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: right;
+  letter-spacing: 0.6px;
+  color: #4E2FD2;
+
 }
 
+.cards-options-img{
+  width: 22px;
+  height: 22px;
+  object-fit: cover;
+}
+.cards-options{
+  font-family: "Gilroy-Medium", sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 10px;
+  line-height: 100%;
+  display: flex;
+  align-items: center;
+  letter-spacing: 0.6px;
+  color: #1F1F1F;
 
+}
 
 html, body {
-  @apply bg-lightPurple text-textBlack;
+  @apply bg-white text-textBlack;
   font-family: sans-serif;
 }
 
