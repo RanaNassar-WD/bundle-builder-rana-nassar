@@ -1,12 +1,13 @@
 import { CameraOption, Plan, SensorOption } from "@/types/builder";
 import { Card, Divider } from "antd";
 
-export default function SummaryPanel({ selected, selectedSensors, selectedPlan, onUpdateQty, onSensorUpdateQty }: {
+export default function SummaryPanel({ selected, selectedSensors, selectedPlan, onUpdateQty, onSensorUpdateQty, onSaveSystem }: {
   selected: { cam: CameraOption; quantity: number; color?: string; image?: string }[];
   selectedSensors: { sensor: SensorOption; quantity: number; color?: string; image?: string }[];
   selectedPlan: Plan | null;
   onUpdateQty: (camId: string, color: string | undefined, delta: number) => void;
   onSensorUpdateQty: (sensorId: string, color: string | undefined, delta: number) => void;
+  onSaveSystem: () => void;
 }) {
   // Calculate total before discount
   const totalBefore = selected.reduce(
@@ -179,44 +180,45 @@ export default function SummaryPanel({ selected, selectedSensors, selectedPlan, 
                 <span className="review-price-after">{selectedPlan.shippingPriceAfter}</span>
               </div>
             </div>
-            <div className="flex items-center justify-between gap-2 p-1 mt-2 rounded-md mt-4">
 
-              <div className="w-[78px] h-[78px] flex items-center justify-center items-center flex-shrink-0">
-                <img src="/assets/images/guarntee.png" alt="guarantee" className="w-full h-full object-cover" />
-              </div>
-
-              {/* Prices */}
-              <div className="guarantee-container">
-                <div className="guarantee-box">
-                  As low as 19.99/mo
-
-
-                </div>
-                <div className="flex justify-center items-center gap-2 ">
-                  <div className="total-before-price">${totalBefore.toFixed(2)}</div>
-                  <div className="total-price">${total.toFixed(2)}</div>
-                </div>
-              </div>
-
-
-            </div>
-            <div className=" savings flex justify-center items-center">
-              Congrats! You're saving ${(totalBefore - total).toFixed(2)} on your security bundle!
-            </div>
-            <div className="flex justify-center items-center w-full p-2">
-              <button
-                className="checkout-btn"
-              >
-                Checkout
-              </button>
-
-            </div>
-            <div className="flex justify-center items-center w-full mt-0">
-              <p className="underline font-Medium cursor-pointer"> <i> Save my system for later</i>
-              </p>
-            </div>
           </>
         )}
+        <div className="flex items-center justify-between gap-2 p-1 mt-2 rounded-md mt-4">
+
+          <div className="w-[78px] h-[78px] flex items-center justify-center items-center flex-shrink-0">
+            <img src="/assets/images/guarntee.png" alt="guarantee" className="w-full h-full object-cover" />
+          </div>
+
+          {/* Prices */}
+          <div className="guarantee-container">
+            <div className="guarantee-box">
+              As low as 19.99/mo
+
+
+            </div>
+            <div className="flex justify-center items-center gap-2 ">
+              <div className="total-before-price">${totalBefore.toFixed(2)}</div>
+              <div className="total-price">${total.toFixed(2)}</div>
+            </div>
+          </div>
+
+
+        </div>
+        <div className=" savings flex justify-center items-center">
+          Congrats! You're saving ${(totalBefore - total).toFixed(2)} on your security bundle!
+        </div>
+        <div className="flex justify-center items-center w-full p-2">
+          <button
+            className="checkout-btn"
+          >
+            Checkout
+          </button>
+
+        </div>
+        <div className="flex justify-center items-center w-full mt-0">
+          <p className="underline font-Medium cursor-pointer" onClick={onSaveSystem}> <i> Save my system for later</i>
+          </p>
+        </div>
 
         <div className="pt-4">
 

@@ -1,0 +1,77 @@
+[
+    {
+        "id": "v4",
+        "name": "Wyze Cam v4",
+        "description": "The clearest Wyze Cam ever made.",
+        "priceBefore": 35.98,
+        "priceAfter": 27.98,
+        "discount": 22,
+        "image": "/assets/images/image1.png",
+        "options": [
+            {
+                "image": "/assets/images/card1-option-white.png",
+                "text": "White"
+            },
+            {
+                "image": "/assets/images/card1-option-gray.png",
+                "text": "Gray"
+            },
+            {
+                "image": "/assets/images/card1-option-black.png",
+                "text": "Black"
+            }
+        ]
+    },
+    {
+        "id": "pan-v2",
+        "name": "Wyze Cam Pan v2",
+        "description": "360° pan and 180° tilt security camera.",
+        "priceBefore": 39.98,
+        "priceAfter": 34.98,
+        "discount": 12,
+        "image": "/assets/images/image2.png",
+        "options": [
+            {
+                "image": "/assets/images/card2-option-white.png",
+                "text": "White"
+            },
+            {
+                "image": "/assets/images/card2-option-black.png",
+                "text": "Black"
+            }
+        ]
+    },
+    {
+        "id": "pan-v3",
+        "name": "Wyze Cam Floodlight v2",
+        "description": "2K Floodlight Camera with a 160° wide-angle view for your garage .",
+        "priceBefore": 89.98,
+        "priceAfter": 69.98,
+        "discount": 22,
+        "image": "/assets/images/image3.png",
+        "options": [
+            {
+                "image": "/assets/images/card3-option-white.png",
+                "text": "White"
+            },
+            {
+                "image": "/assets/images/card3-option-black.png",
+                "text": "Black"
+            }
+        ]
+    },
+    {
+        "id": "pan-v4",
+        "name": "Wyze duo cam Doorbell",
+        "description": "Two cameras, Two views. Double the porch protection.",
+        "priceBefore": 69.98,
+        "image": "/assets/images/image4.png"
+    },
+    {
+        "id": "pan-v5",
+        "name": "Wyze Cam Pan v5",
+        "description": "360° pan and 180° tilt.",
+        "priceBefore": 89.98,
+        "image": "/assets/images/image5.png"
+    }
+]
