@@ -13,7 +13,7 @@ function SensorSelector({ isExpanded, setIsExpanded, onSelectionChange, onNextCl
   useEffect(() => {
     async function fetchSensorOptions() {
       try {
-        const response = await fetch('/sensorOption.json');
+        const response = await fetch('https://raw.githubusercontent.com/RanaNassar-WD/bundle-builder-rana-nassar/master/public/sensorOption.json');
         const data = await response.json();
         setSensorOptions(data);
       } catch (error) {

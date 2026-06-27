@@ -10,7 +10,7 @@ function PlanSelector({ isExpanded, setIsExpanded, onNextClick, onPlanSelect }: 
     useEffect(() => {
         async function fetchCameraOptions() {
             try {
-                const response = await fetch('/plan.json');
+                const response = await fetch('https://raw.githubusercontent.com/RanaNassar-WD/bundle-builder-rana-nassar/master/public/plan.json');
                 const data = await response.json();
                 setPlan(data);
             } catch (error) {
