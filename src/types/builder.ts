@@ -28,8 +28,6 @@ export interface Plan {
   name: string;
   priceBefore: string;
   priceAfter: string;
-  icon: React.ReactNode;
-  shippingIcon: React.ReactNode;
   shippingText: string;
   shippingPriceBefore: string;
   shippingPriceAfter: string;

@@ -2,59 +2,98 @@ import { SensorOption, SensorState } from '@/types/builder';
 import { Collapse, CollapseProps } from 'antd';
 import React, { useEffect, useState } from 'react'
 
-function SensorSelector({ isExpanded, setIsExpanded, onSelectionChange, onNextClick }: { isExpanded: boolean, setIsExpanded: (value: boolean) => void, onSelectionChange: (selected: { sensor: SensorOption; quantity: number; color?: string, image?: string }[]) => void, onNextClick: () => void }) {
+function SensorSelector({ isExpanded, setIsExpanded, onSelectionChange, onNextClick, initialSelections }: { isExpanded: boolean, setIsExpanded: (value: boolean) => void, onSelectionChange: (selected: { sensor: SensorOption; quantity: number; color?: string, image?: string }[]) => void, onNextClick: () => void, initialSelections?: { sensor: SensorOption; quantity: number; color?: string, image?: string }[] }) {
 
-  const sensorOptions: SensorOption[] = [
-    {
-      id: "1",
-      name: "Wyze Sense Motion Sensor",
-      description: "Detects motion and sends alerts to your phone.",
-      priceBefore: 59.98,
-      image: "/assets/images/sensor1.png",
-    },
-    {
-      id: "2",
-      name: "Wyze Sense Hub (Required)",
-      description: "Connects and manages all your Wyze Sense devices.",
-      priceBefore: 29.92,
-      priceAfter: 22.98,
-      discount: 25,
-      image: "/assets/images/sensor2.png",
+  const [sensorOptions, setSensorOptions] = useState<SensorOption[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [states, setStates] = useState<Record<string, SensorState>>({});
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  // Fetch sensor options on mount
+  useEffect(() => {
+    async function fetchSensorOptions() {
+      try {
+        const response = await fetch('/sensorOption.json');
+        const data = await response.json();
+        setSensorOptions(data);
+      } catch (error) {
+        console.error('Failed to fetch sensor options:', error);
+      } finally {
+        setLoading(false);
+      }
     }
-  ]
-  const [states, setStates] = useState<Record<string, SensorState>>(() => {
-    const initialState: Record<string, SensorState> = {};
-    sensorOptions.forEach((sensor, i) => {
-      if (sensor.options && sensor.options.length > 0) {
 
-        sensor.options.forEach((opt, optIndex) => {
-          const key = `${i}-${opt.text}`;
+    fetchSensorOptions();
+  }, []);
+
+  // Initialize states when sensorOptions loads
+  useEffect(() => {
+    if (sensorOptions.length === 0 || isInitialized) return;
+
+    const initialState: Record<string, SensorState> = {};
+
+    // If we have saved selections, restore them
+    if (initialSelections && initialSelections.length > 0) {
+      sensorOptions.forEach((sensor, i) => {
+        if (sensor.options && sensor.options.length > 0) {
+          sensor.options.forEach((opt) => {
+            const key = `${i}-${opt.text}`;
+            const savedItem = initialSelections.find(
+              item => item.sensor.id === sensor.id && item.color === opt.text
+            );
+            initialState[key] = {
+              color: opt.text,
+              quantity: savedItem?.quantity || 1,
+              selected: !!savedItem,
+            };
+          });
+        } else {
+          const key = `${i}-default`;
+          const savedItem = initialSelections.find(item => item.sensor.id === sensor.id);
           initialState[key] = {
-            color: opt.text,
+            color: "",
+            quantity: savedItem?.quantity || 1,
+            selected: !!savedItem,
+          };
+        }
+      });
+    } else {
+      // Default initialization: nothing selected for sensors
+      sensorOptions.forEach((sensor, i) => {
+        if (sensor.options && sensor.options.length > 0) {
+          sensor.options.forEach((opt) => {
+            const key = `${i}-${opt.text}`;
+            initialState[key] = {
+              color: opt.text,
+              quantity: 1,
+              selected: false,
+            };
+          });
+        } else {
+          const key = `${i}-default`;
+          initialState[key] = {
+            color: "",
             quantity: 1,
             selected: false,
           };
-        });
-      } else {
-        // Sensor without color options
-        const key = `${i}-default`;
-        initialState[key] = {
-          color: "",
-          quantity: 1,
-          selected: false,
-        };
-      }
-    });
+        }
+      });
+    }
 
-    return initialState;
-  })
+    setStates(initialState);
+    setIsInitialized(true);
+  }, [sensorOptions, initialSelections, isInitialized]);
+
 
   useEffect(() => {
+    if (!isInitialized || sensorOptions.length === 0) return;
+
     const selected = Object.entries(states)
       .filter(([_, s]) => s.selected)
       .map(([key, s]) => {
         const [i] = key.split("-");
         const sensor = sensorOptions[Number(i)];
+        if (!sensor) return null;
         const optionImage = sensor.options?.find((opt) => opt.text === s.color)?.image ?? sensor.image;
         return {
           sensor,
@@ -62,9 +101,10 @@ function SensorSelector({ isExpanded, setIsExpanded, onSelectionChange, onNextCl
           color: s.color,
           image: optionImage,
         };
-      });
+      })
+      .filter(item => item !== null);
     onSelectionChange(selected);
-  }, [states, onSelectionChange]);
+  }, [states, onSelectionChange, isInitialized, sensorOptions]);
 
   const toggleSelect = (i: number, color: string) => {
     const key = color ? `${i}-${color}` : `${i}-default`;
@@ -110,6 +150,14 @@ function SensorSelector({ isExpanded, setIsExpanded, onSelectionChange, onNextCl
   };
 
   const selectedCount = Object.values(states).filter((s) => s.selected).length;
+
+  if (loading || sensorOptions.length === 0) {
+    return (
+      <div className="flex items-center justify-center p-8 bg-white rounded-lg shadow">
+        <span className="text-gray-600">Loading sensors...</span>
+      </div>
+    );
+  }
 
   const collapseLabel = (
     <div className="flex flex-col gap-1 " >

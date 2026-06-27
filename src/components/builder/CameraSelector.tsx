@@ -5,121 +5,97 @@ import { Collapse } from "antd";
 import type { CollapseProps } from "antd";
 import { CameraOption, CameraState } from "@/types/builder";
 
-const cameraOptions: CameraOption[] = [
-  {
-    id: "v4",
-    name: "Wyze Cam v4",
-    description: "The clearest Wyze Cam ever made.",
-    priceBefore: 35.98,
-    priceAfter: 27.98,
-    discount: 22,
-    image: "/assets/images/image1.png",
-    options: [
-      {
-        image: "/assets/images/card1-option-white.png",
-        text: "White"
-      },
-      {
-        image: "/assets/images/card1-option-gray.png",
-        text: "Gray"
-      },
-      {
-        image: "/assets/images/card1-option-black.png",
-        text: "Black"
-      }
-    ]
-  },
-  {
-    id: "pan-v2",
-    name: "Wyze Cam Pan v2",
-    description: "360° pan and 180° tilt security camera.",
-    priceBefore: 39.98,
-    priceAfter: 34.98,
-    discount: 12,
-    image: "/assets/images/image2.png",
-    options: [
-      {
-        image: "/assets/images/card2-option-white.png",
-        text: "White"
-      },
-      {
-        image: "/assets/images/card2-option-black.png",
-        text: "Black"
-      }
-    ]
-  },
-  {
-    id: "pan-v3",
-    name: "Wyze Cam Floodlight v2",
-    description: "2K Floodlight Camera with a 160° wide-angle view for your garage .",
-    priceBefore: 89.98,
-    priceAfter: 69.98,
-    discount: 22,
-    image: "/assets/images/image3.png",
-    options: [
-      {
-        image: "/assets/images/card3-option-white.png",
-        text: "White"
-      },
-      {
-        image: "/assets/images/card3-option-black.png",
-        text: "Black"
-      }
-    ]
-  },
-  {
-    id: "pan-v4",
-    name: "Wyze duo cam Doorbell",
-    description: "Two cameras, Two views. Double the porch protection.",
-    priceBefore: 69.98,
-    image: "/assets/images/image4.png",
-  },
-  {
-    id: "pan-v5",
-    name: "Wyze Cam Pan v5",
-    description: "360° pan and 180° tilt.",
-    priceBefore: 89.98,
-    image: "/assets/images/image5.png",
-  },
-];
-
-export default function CameraSelector({ onSelectionChange, onNextClick }: { onSelectionChange: (selected: { cam: CameraOption; quantity: number; color?: string, image?: string }[]) => void, onNextClick: () => void }) {
-
+export default function CameraSelector({ onSelectionChange, onNextClick, initialSelections }: { onSelectionChange: (selected: { cam: CameraOption; quantity: number; color?: string, image?: string }[]) => void, onNextClick: () => void, initialSelections?: { cam: CameraOption; quantity: number; color?: string, image?: string }[] }) {
+  const [cameraOptions, setCameraOptions] = useState<CameraOption[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isExpanded, setIsExpanded] = useState(true);
-  const [states, setStates] = useState<Record<string, CameraState>>(() => {
+  const [states, setStates] = useState<Record<string, CameraState>>({});
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  // Fetch camera options on mount
+  useEffect(() => {
+    async function fetchCameraOptions() {
+      try {
+        const response = await fetch('https://raw.githubusercontent.com/RanaNassar-WD/bundle-builder-rana-nassar/master/public/cameraOptions.json');
+        const data = await response.json();
+        setCameraOptions(data);
+      } catch (error) {
+        console.error('Failed to fetch camera options:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchCameraOptions();
+  }, []);
+
+  // Initialize states when cameraOptions loads
+  useEffect(() => {
+    if (cameraOptions.length === 0 || isInitialized) return;
+
     const initialState: Record<string, CameraState> = {};
 
-    cameraOptions.forEach((camera, i) => {
-      if (camera.options && camera.options.length > 0) {
-
-        camera.options.forEach((opt, optIndex) => {
-          const key = `${i}-${opt.text}`;
+    // If we have saved selections, restore them
+    if (initialSelections && initialSelections.length > 0) {
+      cameraOptions.forEach((camera, i) => {
+        if (camera.options && camera.options.length > 0) {
+          camera.options.forEach((opt) => {
+            const key = `${i}-${opt.text}`;
+            const savedItem = initialSelections.find(
+              item => item.cam.id === camera.id && item.color === opt.text
+            );
+            initialState[key] = {
+              color: opt.text,
+              quantity: savedItem?.quantity || 1,
+              selected: !!savedItem,
+            };
+          });
+        } else {
+          const key = `${i}-default`;
+          const savedItem = initialSelections.find(item => item.cam.id === camera.id);
           initialState[key] = {
-            color: opt.text,
-            quantity: 1,
-            selected: i === 0 && optIndex === 0,
+            color: "",
+            quantity: savedItem?.quantity || 1,
+            selected: !!savedItem,
           };
-        });
-      } else {
-        // Camera without color options
-        const key = `${i}-default`;
-        initialState[key] = {
-          color: "",
-          quantity: 1,
-          selected: i === 0,
-        };
-      }
-    });
+        }
+      });
+    } else {
+      // Default initialization: select first camera, first color
+      cameraOptions.forEach((camera, i) => {
+        if (camera.options && camera.options.length > 0) {
+          camera.options.forEach((opt, optIndex) => {
+            const key = `${i}-${opt.text}`;
+            initialState[key] = {
+              color: opt.text,
+              quantity: 1,
+              selected: i === 0 && optIndex === 0,
+            };
+          });
+        } else {
+          const key = `${i}-default`;
+          initialState[key] = {
+            color: "",
+            quantity: 1,
+            selected: i === 0,
+          };
+        }
+      });
+    }
 
-    return initialState;
-  });
+    setStates(initialState);
+    setIsInitialized(true);
+  }, [cameraOptions, initialSelections, isInitialized]);
 
   useEffect(() => {
+    if (!isInitialized || cameraOptions.length === 0) return;
+
     const selected = Object.entries(states)
       .filter(([_, s]) => s.selected)
       .map(([key, s]) => {
         const [i] = key.split("-");
         const cam = cameraOptions[Number(i)];
+        if (!cam) return null;
         const optionImage = cam.options?.find((opt) => opt.text === s.color)?.image ?? cam.image;
         return {
           cam,
@@ -127,9 +103,10 @@ export default function CameraSelector({ onSelectionChange, onNextClick }: { onS
           color: s.color,
           image: optionImage,
         };
-      });
+      })
+      .filter(item => item !== null);
     onSelectionChange(selected);
-  }, [states, onSelectionChange]);
+  }, [states, onSelectionChange, isInitialized, cameraOptions]);
 
   const toggleSelect = (i: number, color: string) => {
     const key = color ? `${i}-${color}` : `${i}-default`;
@@ -179,6 +156,14 @@ export default function CameraSelector({ onSelectionChange, onNextClick }: { onS
 
 
   const selectedCount = Object.values(states).filter((s) => s.selected).length;
+
+  if (loading || cameraOptions.length === 0) {
+    return (
+      <div className="flex items-center justify-center p-8 bg-white rounded-lg shadow">
+        <span className="text-gray-600">Loading cameras...</span>
+      </div>
+    );
+  }
 
   const collapseLabel = (
     <div className="flex flex-col gap-2 " >
