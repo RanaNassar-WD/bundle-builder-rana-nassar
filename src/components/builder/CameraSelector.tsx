@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Collapse } from "antd";
 import type { CollapseProps } from "antd";
 import { CameraOption, CameraState } from "@/types/builder";
@@ -10,7 +10,7 @@ export default function CameraSelector({ onSelectionChange, onNextClick, initial
   const [loading, setLoading] = useState(true);
   const [isExpanded, setIsExpanded] = useState(true);
   const [states, setStates] = useState<Record<string, CameraState>>({});
-  const [isInitialized, setIsInitialized] = useState(false);
+  const isInitializedRef = useRef(false);
 
   // Fetch camera options on mount
   useEffect(() => {
@@ -31,7 +31,7 @@ export default function CameraSelector({ onSelectionChange, onNextClick, initial
 
   // Initialize states when cameraOptions loads
   useEffect(() => {
-    if (cameraOptions.length === 0 || isInitialized) return;
+    if (cameraOptions.length === 0 || isInitializedRef.current) return;
 
     const initialState: Record<string, CameraState> = {};
 
@@ -84,11 +84,11 @@ export default function CameraSelector({ onSelectionChange, onNextClick, initial
     }
 
     setStates(initialState);
-    setIsInitialized(true);
-  }, [cameraOptions, initialSelections, isInitialized]);
+    isInitializedRef.current = true;
+  }, [cameraOptions, initialSelections]);
 
   useEffect(() => {
-    if (!isInitialized || cameraOptions.length === 0) return;
+    if (!isInitializedRef.current || cameraOptions.length === 0) return;
 
     const selected = Object.entries(states)
       .filter(([_, s]) => s.selected)
@@ -106,7 +106,7 @@ export default function CameraSelector({ onSelectionChange, onNextClick, initial
       })
       .filter(item => item !== null);
     onSelectionChange(selected);
-  }, [states, onSelectionChange, isInitialized, cameraOptions]);
+  }, [states, onSelectionChange, cameraOptions]);
 
   const toggleSelect = (i: number, color: string) => {
     const key = color ? `${i}-${color}` : `${i}-default`;

@@ -1,13 +1,13 @@
 import { SensorOption, SensorState } from '@/types/builder';
 import { Collapse, CollapseProps } from 'antd';
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 
 function SensorSelector({ isExpanded, setIsExpanded, onSelectionChange, onNextClick, initialSelections }: { isExpanded: boolean, setIsExpanded: (value: boolean) => void, onSelectionChange: (selected: { sensor: SensorOption; quantity: number; color?: string, image?: string }[]) => void, onNextClick: () => void, initialSelections?: { sensor: SensorOption; quantity: number; color?: string, image?: string }[] }) {
 
   const [sensorOptions, setSensorOptions] = useState<SensorOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [states, setStates] = useState<Record<string, SensorState>>({});
-  const [isInitialized, setIsInitialized] = useState(false);
+  const isInitializedRef = useRef(false);
 
   // Fetch sensor options on mount
   useEffect(() => {
@@ -28,7 +28,7 @@ function SensorSelector({ isExpanded, setIsExpanded, onSelectionChange, onNextCl
 
   // Initialize states when sensorOptions loads
   useEffect(() => {
-    if (sensorOptions.length === 0 || isInitialized) return;
+    if (sensorOptions.length === 0 || isInitializedRef.current) return;
 
     const initialState: Record<string, SensorState> = {};
 
@@ -81,12 +81,12 @@ function SensorSelector({ isExpanded, setIsExpanded, onSelectionChange, onNextCl
     }
 
     setStates(initialState);
-    setIsInitialized(true);
-  }, [sensorOptions, initialSelections, isInitialized]);
+    isInitializedRef.current = true;
+  }, [sensorOptions, initialSelections]);
 
 
   useEffect(() => {
-    if (!isInitialized || sensorOptions.length === 0) return;
+    if (!isInitializedRef.current || sensorOptions.length === 0) return;
 
     const selected = Object.entries(states)
       .filter(([_, s]) => s.selected)
@@ -104,7 +104,7 @@ function SensorSelector({ isExpanded, setIsExpanded, onSelectionChange, onNextCl
       })
       .filter(item => item !== null);
     onSelectionChange(selected);
-  }, [states, onSelectionChange, isInitialized, sensorOptions]);
+  }, [states, onSelectionChange, sensorOptions]);
 
   const toggleSelect = (i: number, color: string) => {
     const key = color ? `${i}-${color}` : `${i}-default`;

@@ -1,3 +1,4 @@
+
 'use client';
 import CameraSelector from "@/components/builder/CameraSelector";
 import ExtrasSelector from "@/components/builder/ExtrasSelector";
@@ -5,13 +6,44 @@ import PlanSelector from "@/components/builder/PlanSelector";
 import SensorSelector from "@/components/builder/SensorSelector";
 import SummaryPanel from "@/components/builder/SummaryPanel";
 import { CameraOption, Plan, SensorOption } from "@/types/builder";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { message } from "antd";
 
 const STORAGE_KEY = 'bundle-builder-saved-system';
 
+type SavedSystem = {
+  selectedCameras?: { cam: CameraOption; quantity: number; color?: string, image?: string }[];
+  selectedSensors?: { sensor: SensorOption; quantity: number; color?: string, image?: string }[];
+  selectedPlan?: Plan | null;
+};
+
+type SavedPlan = Pick<Plan, "id" | "name" | "priceBefore" | "priceAfter" | "shippingText" | "shippingPriceBefore" | "shippingPriceAfter">;
+
+const loadSavedSystem = (): SavedSystem => {
+  if (typeof window === "undefined") {
+    return {};
+  }
+
+  try {
+    const savedData = localStorage.getItem(STORAGE_KEY);
+    if (!savedData) {
+      return {};
+    }
+
+    const parsed = JSON.parse(savedData);
+    return {
+      selectedCameras: parsed.selectedCameras,
+      selectedSensors: parsed.selectedSensors,
+      selectedPlan: parsed.selectedPlan ? reconstructPlan(parsed.selectedPlan) : null,
+    };
+  } catch (error) {
+    console.error('Error loading saved system:', error);
+    return {};
+  }
+};
+
 // Reconstruct plan with icons from saved data
-const reconstructPlan = (savedPlan: any): Plan | null => {
+const reconstructPlan = (savedPlan: SavedPlan | null | undefined): Plan | null => {
   if (!savedPlan) return null;
 
   return {
@@ -26,42 +58,21 @@ const reconstructPlan = (savedPlan: any): Plan | null => {
 };
 
 export default function Home() {
+  const [savedSystem] = useState<SavedSystem>(() => loadSavedSystem());
   const [selectedCameras, setSelectedCameras] = useState<
     { cam: CameraOption; quantity: number; color?: string, image?: string }[]
   >([]);
   const [selectedSensors, setSelectedSensors] = useState<
     { sensor: SensorOption; quantity: number; color?: string, image?: string }[]
   >([]);
-  const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
+  const [selectedPlan, setSelectedPlan] = useState<Plan | null>(savedSystem.selectedPlan ?? null);
   const [planSelectorExpanded, setPlanSelectorExpanded] = useState(false);
   const [sensorSelectorExpanded, setSensorSelectorExpanded] = useState(false);
   const [extrasSelectorExpanded, setExtrasSelectorExpanded] = useState(false);
 
   // Store initial saved selections to pass to selectors
-  const [savedCamerasInit, setSavedCamerasInit] = useState<{ cam: CameraOption; quantity: number; color?: string, image?: string }[] | undefined>(undefined);
-  const [savedSensorsInit, setSavedSensorsInit] = useState<{ sensor: SensorOption; quantity: number; color?: string, image?: string }[] | undefined>(undefined);
-
-  // Load saved state from localStorage on mount
-  useEffect(() => {
-    try {
-      const savedData = localStorage.getItem(STORAGE_KEY);
-      if (savedData) {
-        const parsed = JSON.parse(savedData);
-        if (parsed.selectedCameras) {
-          setSavedCamerasInit(parsed.selectedCameras);
-        }
-        if (parsed.selectedSensors) {
-          setSavedSensorsInit(parsed.selectedSensors);
-        }
-        if (parsed.selectedPlan) {
-          const fullPlan = reconstructPlan(parsed.selectedPlan);
-          setSelectedPlan(fullPlan);
-        }
-      }
-    } catch (error) {
-      console.error('Error loading saved system:', error);
-    }
-  }, []);
+  const [savedCamerasInit] = useState<{ cam: CameraOption; quantity: number; color?: string, image?: string }[] | undefined>(savedSystem.selectedCameras);
+  const [savedSensorsInit] = useState<{ sensor: SensorOption; quantity: number; color?: string, image?: string }[] | undefined>(savedSystem.selectedSensors);
 
   // Save current state to localStorage
   const handleSaveSystem = () => {
@@ -118,7 +129,7 @@ export default function Home() {
           <div>  <CameraSelector onSelectionChange={setSelectedCameras} onNextClick={() => setPlanSelectorExpanded(true)} initialSelections={savedCamerasInit} /></div>
           <div>   <PlanSelector onPlanSelect={setSelectedPlan} onNextClick={() => setSensorSelectorExpanded(true)} isExpanded={planSelectorExpanded} setIsExpanded={setPlanSelectorExpanded} /></div>
           <div>   <SensorSelector onSelectionChange={setSelectedSensors} onNextClick={() => setExtrasSelectorExpanded(true)} isExpanded={sensorSelectorExpanded} setIsExpanded={setSensorSelectorExpanded} initialSelections={savedSensorsInit} /></div>
-          <div>   <ExtrasSelector isExpanded={extrasSelectorExpanded} setIsExpanded={setExtrasSelectorExpanded} selectedCameras={selectedCameras} selectedSensors={selectedSensors} selectedPlan={selectedPlan} handleUpdateQty={handleUpdateQty} handleSensorUpdateQty={handleSensorUpdateQty} /></div>
+          <div>   <ExtrasSelector isExpanded={extrasSelectorExpanded} setIsExpanded={setExtrasSelectorExpanded} selectedCameras={selectedCameras} selectedSensors={selectedSensors} selectedPlan={selectedPlan} handleUpdateQty={handleUpdateQty} handleSensorUpdateQty={handleSensorUpdateQty} onSaveSystem={handleSaveSystem} /></div>
         </div>
 
         {/* RIGHT SIDE – Summary (1/3) */}

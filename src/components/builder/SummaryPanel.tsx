@@ -225,7 +225,7 @@ export default function SummaryPanel({ selected, selectedSensors, selectedPlan, 
 
         </div>
         <div className=" savings flex justify-center items-center">
-          Congrats! You're saving ${(totalBefore - total).toFixed(2)} on your security bundle!
+          Congrats! You are saving ${(totalBefore - total).toFixed(2)} on your security bundle!
         </div>
         <div className="flex justify-center items-center w-full p-2">
           <button

@@ -2,7 +2,7 @@ import { Collapse, CollapseProps } from 'antd';
 import SummaryPanel from './SummaryPanel';
 import { CameraOption, Plan, SensorOption } from '@/types/builder';
 
-function ExtrasSelector({ isExpanded, setIsExpanded, selectedCameras, selectedSensors, selectedPlan, handleUpdateQty, handleSensorUpdateQty }: { isExpanded: boolean, setIsExpanded: (value: boolean) => void, selectedCameras: { cam: CameraOption; quantity: number; color?: string, image?: string }[], selectedSensors: { sensor: SensorOption; quantity: number; color?: string, image?: string }[], selectedPlan: Plan | null, handleUpdateQty: (camId: string, color: string | undefined, delta: number) => void, handleSensorUpdateQty: (sensorId: string, color: string | undefined, delta: number) => void }) {
+function ExtrasSelector({ isExpanded, setIsExpanded, selectedCameras, selectedSensors, selectedPlan, handleUpdateQty, handleSensorUpdateQty, onSaveSystem }: { isExpanded: boolean, setIsExpanded: (value: boolean) => void, selectedCameras: { cam: CameraOption; quantity: number; color?: string, image?: string }[], selectedSensors: { sensor: SensorOption; quantity: number; color?: string, image?: string }[], selectedPlan: Plan | null, handleUpdateQty: (camId: string, color: string | undefined, delta: number) => void, handleSensorUpdateQty: (sensorId: string, color: string | undefined, delta: number) => void, onSaveSystem: () => void }) {
   const collapseLabel = (
     <div className="flex flex-col gap-1 " >
       <span className="step-label">Step 3 of 4</span>
@@ -34,7 +34,7 @@ function ExtrasSelector({ isExpanded, setIsExpanded, selectedCameras, selectedSe
       children: (
         <div className="flex bg-lightPurple p-4 -m-4">
           <div className="w-1/2 ">
-            <SummaryPanel selected={selectedCameras} selectedSensors={selectedSensors} selectedPlan={selectedPlan} onUpdateQty={handleUpdateQty} onSensorUpdateQty={handleSensorUpdateQty} />
+            <SummaryPanel selected={selectedCameras} selectedSensors={selectedSensors} selectedPlan={selectedPlan} onUpdateQty={handleUpdateQty} onSensorUpdateQty={handleSensorUpdateQty} onSaveSystem={onSaveSystem} />
           </div>
           <div className="w-1/2 flex flex-col gap-4">
             <div className=" p-2 flex items-start gap-4">
@@ -49,7 +49,7 @@ function ExtrasSelector({ isExpanded, setIsExpanded, selectedCameras, selectedSe
               <div className="mt-5">
                 <h3 className="text-lg font-semibold">30-day hassle-free returns</h3>
                 <p className="text-sm text-gray-600">
-                  If you're not totally in love with the product, we will refund you 100%.
+                  If you are not totally in love with the product, we will refund you 100%.
                 </p>
               </div>
             </div>
