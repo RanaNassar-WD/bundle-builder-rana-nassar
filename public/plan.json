@@ -1,0 +1,9 @@
+{
+    "id": "cam-unlimited",
+    "name": "Cam Unlimited",
+    "priceBefore": "$12.99/mo",
+    "priceAfter": "$9.99/mo",
+    "shippingText": "Fast Shipping",
+    "shippingPriceBefore": "$4.99",
+    "shippingPriceAfter": "FREE"
+}

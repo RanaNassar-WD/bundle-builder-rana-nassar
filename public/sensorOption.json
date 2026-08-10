@@ -1,0 +1,18 @@
+[
+    {
+        "id": "1",
+        "name": "Wyze Sense Motion Sensor",
+        "description": "Detects motion and sends alerts to your phone.",
+        "priceBefore": 59.98,
+        "image": "/assets/images/sensor1.png"
+    },
+    {
+        "id": "2",
+        "name": "Wyze Sense Hub (Required)",
+        "description": "Connects and manages all your Wyze Sense devices.",
+        "priceBefore": 29.92,
+        "priceAfter": 22.98,
+        "discount": 25,
+        "image": "/assets/images/sensor2.png"
+    }
+]
