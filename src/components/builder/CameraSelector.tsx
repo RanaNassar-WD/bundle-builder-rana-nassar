@@ -16,7 +16,7 @@ export default function CameraSelector({ onSelectionChange, onNextClick, initial
   useEffect(() => {
     async function fetchCameraOptions() {
       try {
-        const response = await fetch('https://raw.githubusercontent.com/RanaNassar-WD/bundle-builder-rana-nassar/master/public/cameraOptions.json');
+        const response = await fetch('/cameraOptions.json');
         const data = await response.json();
         setCameraOptions(data);
       } catch (error) {
